@@ -1,0 +1,36 @@
+    pragma solidity ^0.8.0;
+    // SPDX-License-Identifier: MIT
+
+   import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+   contract StephToken is ERC20 {
+    address admin;
+
+    constructor() ERC20("Steph", "STH") {
+        admin = msg.sender;
+        _mint(address(this), 10 * 10 ** decimals());
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Invalid User");
+        _;
+    }
+
+    function MintTokens(address recipient, uint256 quantity) public onlyAdmin {
+        uint balance = balanceOf(address(this));
+        require(balance >= quantity, "In-sufficient balance");
+        _transfer(address(this), recipient, quantity);
+    }
+
+    function BurnTokens(uint256 amount) public {
+        _burn(msg.sender, amount);
+    }
+
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        _transfer(sender, recipient, amount);
+        uint256 currentAllowance = allowance(sender, _msgSender());
+        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        _approve(sender, _msgSender(), currentAllowance - amount);
+        return true;
+   }
+   }
